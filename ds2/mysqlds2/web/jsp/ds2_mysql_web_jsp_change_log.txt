@@ -1,0 +1,4 @@
+
+ds2_mysql_web_jsp_change_log.txt
+
+12/16/05: Added target hostname (localhost) to JSP connect string for clarity

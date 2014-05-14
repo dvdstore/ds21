@@ -1,0 +1,83 @@
+ds2_mt_order_doc.txt: Oracle DS2 driver documentation
+
+syntax:  ds2_mt_order database_db_connect_string n_threads <reset_time(min) <run_time(min) <S|M|L>>>
+
+Parameter Name      Description                                         Default Value
+
+n_threads           number of driver program threads                    none
+reset_time          time before stats are reset (min)                   none
+run_time            run time (min)                                      infinite
+database size       database size (S,M or L)                            S
+
+The following parameters are set in the code. Modify program and recompile to change:
+Parameter Name      Description                                         Default Value
+ramp rate           startup rate (users/sec)                            10
+think time          think time (sec)                                    0
+pct newcustomers    percent of customers that are new customers         20
+number of searches  average number of searches per order                3
+search batch size   average number of items returned in each search     5
+number of line items  average number of items per order                 5
+
+
+Typical run:
+
+--------------------------------------------------------------------------------------------------------------
+
+C:\ds2\oracleds2>ds2_mt_order w2k31 1 1 1
+Starting 1 ds instances to drive small database w2k31 for 1.0 min with reset in 1.0 min
+
+max_customer= 20000  max_product= 10000
+10009 products in array
+Thread 1: Started
+All users active
+Thread 1: Connected to Oracle
+14:26:41: 12 trans in 0.1 min or 120 tpm w/ ART= 0.080 sec, ART-login=0.011 ART-newcust=0.052 ART-br
+owse=0.006 ART-purchase=0.038, n_login=8 n_newcust=4 n_browse=32 n_purchase=12 n_rollback=1 rollback
+_pct=8.3
+14:26:47: 77 trans in 0.2 min or 385 tpm w/ ART= 0.094 sec, ART-login=0.028 ART-newcust=0.018 ART-br
+owse=0.006 ART-purchase=0.050, n_login=64 n_newcust=13 n_browse=234 n_purchase=77 n_rollback=5 rollb
+ack_pct=6.5
+
+...
+
+14:27:29: 743 trans in 0.9 min or 824 tpm w/ ART= 0.066 sec, ART-login=0.013 ART-newcust=0.009 ART-b
+rowse=0.005 ART-purchase=0.039, n_login=604 n_newcust=139 n_browse=2267 n_purchase=743 n_rollback=26
+ rollback_pct=3.5
+14:27:35: 810 trans in 1.0 min or 808 tpm w/ ART= 0.068 sec, ART-login=0.014 ART-newcust=0.010 ART-b
+rowse=0.005 ART-purchase=0.040, n_login=660 n_newcust=150 n_browse=2458 n_purchase=810 n_rollback=29
+ rollback_pct=3.6
+14:27:35: Resetting statistics and timer
+14:27:41: 96 trans in 0.1 min or 960 tpm w/ ART= 0.059 sec, ART-login=0.011 ART-newcust=0.007 ART-br
+owse=0.004 ART-purchase=0.036, n_login=78 n_newcust=18 n_browse=292 n_purchase=96 n_rollback=4 rollb
+ack_pct=4.2
+
+...
+
+14:28:29: 901 trans in 0.9 min or 998 tpm w/ ART= 0.059 sec, ART-login=0.007 ART-newcust=0.007 ART-b
+rowse=0.005 ART-purchase=0.038, n_login=725 n_newcust=176 n_browse=2719 n_purchase=901 n_rollback=29
+ rollback_pct=3.2
+14:28:35: 1023 trans in 1.0 min or 1020 tpm w/ ART= 0.058 sec, ART-login=0.007 ART-newcust=0.007 ART
+-browse=0.005 ART-purchase=0.037, n_login=825 n_newcust=198 n_browse=3067 n_purchase=1023 n_rollback
+=32 rollback_pct=3.1
+
+14:28:35:Finished 1023 trans in 1.0 min or 1020 tpm w/ ART= 0.058 sec, ART-login=0.007 ART-newcust=0
+.007 ART-browse=0.005 ART-purchase=0.037, n_login=825 n_newcust=198 n_browse=3067 n_purchase=1023 n_
+rollback=32 rollback_pct=3.1
+Thread 1: 1 trans complete; exiting
+
+C:\ds2\oracleds2>
+--------------------------------------------------------------------------------------------------------------
+Description of counters:
+
+ART:  average response time  - average total response time seen by a user during an order cycle 
+  (sum of all response times during order: login/create new customer, browse(s), purchase),
+ART-login:  average response time for Login step
+ART-newcust:  average response time for NewCustomer step
+ART-purchase:  average response time for Purchase step
+n_login: total number of logins during run (or since reset if there was one)
+n_newcust: total number of new customer registrations during run (or since reset if there was one)
+n_browse: total number of browses during run (or since reset if there was one)
+n_purchase: total number of purchases during run (or since reset if there was one)
+n_rollback:  number of time order has to be rolled back due to insufficient quantity (or since reset if there was one) 
+  (these are counted as completed transactions but won't show up as a new Order in the database)
+rollback_pct: percentage of orders that are rolled back

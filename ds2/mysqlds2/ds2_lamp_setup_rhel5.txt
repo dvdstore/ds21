@@ -1,0 +1,175 @@
+File: lamp_setup_rhel5.txt
+Author: Dave Jaffe
+Last modified: 5/30/11
+
+LAMP Setup on RHEL5
+
+- General comments
+  - This documents the steps I took in building the DVD Store application with PHP5 on Apache 2 and MySQL5.5 back end on RHEL5.5
+
+- Install Red Hat Linux RHEL Server 5.5 from RHEL5.5-Server-20100322.0-x86_64-DVD.iso
+  - Be sure to set hostname (rhel1.dsc.local in this example) and add an entry in hosts for that hostname
+  - Installs Apache httpd-2.2.3-43.el5 and PHP php-5.1.6-27.el5
+
+- Customize
+  - Add user web with default home directory (/home/web); set password
+    - As root: useradd web; passwd web
+  - Fix permissions on /home directories
+    - As root: chmod 755 /home/web;
+  - Customize .bashrc, .bash_profile  in /home/web, /root
+
+- Install MySQL 5
+  - Remove any mysql packages with rpm -e (use rpm -qa|grep -i mysql to see installed packages)
+  - Download latest community version of MySQL (MySQL-5.5.12-1.rhel5.x86_64.tar), plus MySQL-shared-compat-5.5.11-1.rhel5.x86_64.rpm 
+  # tar xf MySQL-5.5.12-1.rhel5.x86_64.tar
+    MySQL-client-5.5.12-1.rhel5.x86_64.rpm
+    MySQL-devel-5.5.12-1.rhel5.x86_64.rpm
+    MySQL-embedded-5.5.12-1.rhel5.x86_64.rpm
+    MySQL-server-5.5.12-1.rhel5.x86_64.rpm
+    MySQL-shared-5.5.12-1.rhel5.x86_64.rpm
+    MySQL-test-5.5.12-1.rhel5.x86_64.rpm
+
+  - As root, rpm -iv following files from RHEL5 installation DVD or from download in the order listed:
+    - MySQL-shared-compat-5.5.11-1.rhel5.x86_64.rpm
+    - perl-DBI-1.52-2.el5.x86_64.rpm
+    - perl-DBD-MySQL-3.0007-2.el5.x86_64.rpm
+    - mysql-server-5.5.12-1.x86_64.rpm
+    - php-pdo-5.1.6-27.el5.x86_64.rpm
+    - php-mysql-5.1.6-5.el5.x86_64.rpm
+
+  - Make mysql start upon boot: chkconfig --level 35 mysql on
+  - Start mysql: service mysql start
+  - Check: mysqladmin --password=(rootpw) status
+
+- Initialize MySQL as root
+  - Create user web and remove anonymous user created by default installation 
+    #mysql --password=(rootpw)
+    mysql> grant all privileges on *.* to web@localhost identified by 'xyz';
+    mysql> grant all privileges on *.* to web@rhel1.dsc.local identified by 'xyz';
+    mysql> grant all privileges on *.* to web@'%' identified by 'xyz';
+    mysql> grant all privileges on *.* to 'apache'@'localhost';
+    mysql> delete from mysql.user where User='';
+
+  - Modify configuration file
+    - Copy /usr/share/doc/mysql-server-5.5.12/my-huge.cnf to /etc/my.cnf, apply following edits:
+      - uncomment all InnoDB lines
+      - insert after query_cache_size line:
+        # TM - The following reduce min string to 3 and disable stopwords in FULLTEXT
+        ft_min_word_len = 3
+        ft_stopword_file =
+      - comment out log-bin=mysql-bin in mysqld section
+    - Optionally, add following line to mysqld section: log=/var/lib/mysql/mysql_query.log
+    - To put new cnf file into effect: 
+      - shutdowm mysql with service mysql stop
+      - Assuming you don't need data in mysql file, in /var/lib/mysql, remove
+        - ibdata1, ib_logfile*, mysql-bin*
+      - service mysql start  
+
+- Set up DVD Store 2 (DS2) database
+  - As root copy tarballs (ds2.tar.gz and ds2_mysql.tar.gz) from http://linux.dell.com/dvdstore to 
+    /  and extract with tar xzf
+  - This creates /ds2 and subdirectories
+  # chown -R web.web /ds2/mysqlds2
+  - Either leave contents of /home/web/data_files alone (for small (10 MB) database) or copy over 
+    medium (1GB) or large (100GB) files
+  - Changes required for MySQL 5.5:
+    - In directory build change Type=(DB engine) to Engine=(DB engine) where DB_engine=InnoDB or MyISAM
+      mysqlds2_create_db.sql
+      mysqlds2_cleanup_small.sql
+      mysqlds2_cleanup_med.sql
+      mysqlds2_cleanup_large.sql
+      mysqlds2_cleanup_generic_template.sql
+    - In load directories remove LOCAL option and change relative paths to absolute:
+      - eg in ./load/cust/mysqlds2_load_cust.sql
+        - change
+          LOAD DATA LOCAL INFILE "../../../data_files/cust/us_cust.csv" INTO TABLE CUSTOMERS FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"';
+          to
+          LOAD DATA INFILE "/ds2/data_files/cust/us_cust.csv" INTO TABLE CUSTOMERS FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"';
+      - do similar in 
+        ./orders/mysqlds2_load_cust_hist.sql
+        ./orders/mysqlds2_load_orders.sql
+        ./orders/mysqlds2_load_orderlines.sql
+        ./prod/mysqlds2_load_prod.sql
+        ./prod/mysqlds2_load_inv.sql
+        and cleanup scripts in build directory
+   
+  - To build and load database, as web: sh mysqlds2_create_all.ksh
+    
+     Contents of mysqlds2_create_all.sh:
+
+      # mysqlds2_create_all.sh
+      # start in ./ds2/mysqlds2
+      cd build
+      mysql -u web --password=xyz < mysqlds2_create_db.sql
+      mysql -u web --password=xyz < mysqlds2_create_ind.sql
+      mysql -u web --password=xyz < mysqlds2_create_sp.sql
+      cd ../load/cust
+      mysql -u web --password=xyz < mysqlds2_load_cust.sql
+      cd ../orders
+      mysql -u web --password=xyz < mysqlds2_load_orders.sql 
+      mysql -u web --password=xyz < mysqlds2_load_orderlines.sql 
+      mysql -u web --password=xyz < mysqlds2_load_cust_hist.sql 
+      cd ../prod
+      mysql -u web --password=xyz < mysqlds2_load_prod.sql 
+      mysql -u web --password=xyz < mysqlds2_load_inv.sql
+
+  - To test:
+    [web@RHEL1 /ds2/mysqlds2]$ mysql --password=xyz
+    Welcome to the MySQL monitor.  Commands end with ; or \g.
+    Your MySQL connection id is 87
+    Server version: 5.5.12 MySQL Community Server (GPL)
+    Copyright (c) 2000, 2010, Oracle and/or its affiliates. All rights reserved.
+    Oracle is a registered trademark of Oracle Corporation and/or its
+    affiliates. Other names may be trademarks of their respective
+    owners.
+    Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+    mysql> use DS2
+    Database changed
+    mysql> select count(*) from CUSTOMERS;
+    +----------+
+    | count(*) |
+    +----------+
+    |  2000000 | 
+    +----------+
+    1 row in set (2.64 sec)
+    
+    mysql> select count(*) from PRODUCTS;
+    +----------+
+    | count(*) |
+    +----------+
+    |   100000 | 
+    +----------+
+    1 row in set (0.00 sec)
+
+- Compile DS2 driver program on Windsows 2008 R2 system:
+  - Install MySQL Connector/NET
+    - Install .NET 4.0 from MS
+    - Download and install mysql-connector-net-6.3.6.msi from MySQL
+  - Install DS2 on C:\
+    - cd C:\ and use winzip to unzip ds2.tar.gz and ds2_mysql.tar.gz
+  - Compile ds2mysqldriver.exe:
+    - cd C:\ds2\mysqlds2 and run
+      C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc /out:ds2mysqldriver.exe  ..\drivers\ds2xdriver.cs ds2mysqlfns.cs    
+      /d:USE_WIN32_TIMER /d:GEN_PERF_CTRS  /r:"C:\Program Files (x86)\MySQL\MySQL Connector Net 6.3.6\Assemblies\v4.0\mysql.DataAccess.dll"
+  - Test:
+    C:\ds2\mysqlds2>ds2mysqldriver --target=RHEL1 --run_time=1 --pct_newcustomers=0
+
+- Set up Apache, PHP
+  - Set Apache start upon system boot. As root: chkconfig --level 35 httpd on
+  - Modify /etc/httpd/conf/httpd.conf:
+    KeepAlive On
+    KeepAliveTimeout 50
+    ServerName rhel1.dsc.local:80     BE SURE TO CHANGE THIS ON CLONED WEB SERVERS
+    AddType application/x-httpd-php .php
+  - Make following changes to PHP config file /etc/php.ini for MySQL: 
+    uncomment error_reporting = E_COMPILE_ERROR|E_ERROR|E_CORE_ERROR
+    comment out error_reporting  =  E_ALL
+    display_errors = On
+    mysqli.default_host = rhel1.dsc.local
+    mysqli.default_user = web
+    mysqli.default_pw = xyz
+  - Start Apache: service httpd start       
+  - Copy ds2 php files to /var/www/html/ds2: 
+    dsbrowse.php, dslogin.php,dspurchase.php, dscommon.inc, dsnewcustomer.php, index.html
+  - access http://rhel1.dsc.local/ds2 with browser
+    

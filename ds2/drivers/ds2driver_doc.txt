@@ -1,0 +1,105 @@
+ds2driver_doc.txt: ds2 driver documentation
+
+Syntax:
+
+ds2xdriver --parameter=value ...        where x = web, mysql, sqlserver, oracle
+
+Enter parameters with format --parm_name=parm_value
+And/or use a config file with argument --config_file=(config file path)
+Parms will be evaluated left to right
+
+Parameter Name      Description                                         Default Value
+
+config_file         config file path                                    none
+target              database/web server hostname or IP address          localhost
+n_threads           number of driver threads                            1
+ramp_rate           startup rate (users/sec)                            10
+run_time            run time (min) - 0 is infinite                      0
+db_size             database size (S,M or L) or actual database size like 5gb, 20 gb, 150gb, etc                            S
+warmup_time         warmup_time (min)                                   1
+think_time          think time (sec)                                    0
+pct_newcustomers    percent of customers that are new customers         20
+n_searches          average number of searches per order                3
+search_batch_size   average number of items returned in each search     5
+n_line_items        average number of items per order                   5
+virt_dir            virtual directory (for web driver)                  ds2
+page_type           web page type (for web driver)                      php
+windows_perf_host   target hostname for Perfmon CPU% display
+linux_perf_host     target for Linux mpstat CPU% display (user:pw:hostname)
+detailed_view	  Detailed Statistics View (Y / N)
+
+Note: target can be of form hostname:port (port 80 assumed if left out)
+
+Sample config file (for MySQL JSP interface):
+
+target=rhel32:8080
+db_size_str=S
+run_time=2
+virt_dir=mysql
+page_type=jsp
+
+
+Typical run:
+
+--------------------------------------------------------------------------------------------------------------
+C:\ds2\drivers> ds2webdriver.exe --target=rhel32 --run_time=1
+target= rhel32  n_threads= 1  ramp_rate= 10  run_time= 1  db_size= S warmup_time= 1  think_time= 0
+pct_newcustomers= 20  n_searches= 3  search_batch_size= 5  n_line_items= 5 virt_dir= ds2  page_type= php detailed_view=N
+
+Using WIN32 QueryPerformanceCounters for measuring response time
+
+Performance Counter Category Test and Counter MaxRT exist
+Thread 0: created for User 0
+Thread 0: connected to rhel32
+Controller (6/30/2005 9:25:52 PM): all threads running
+Controller (6/30/2005 9:25:52 PM): all threads connected - issuing Start
+et=   10.1 n_overall=23 opm=136 rt_tot_lastn_max_msec=867 rt_tot_avg_msec=182 rollbacks: n=0 %=  0.0
+et=   20.3 n_overall=47 opm=138 rt_tot_lastn_max_msec=867 rt_tot_avg_msec=172 rollbacks: n=0 %=  0.0
+et=   30.5 n_overall=72 opm=141 rt_tot_lastn_max_msec=867 rt_tot_avg_msec=165 rollbacks: n=0 %=  0.0
+et=   40.6 n_overall=99 opm=146 rt_tot_lastn_max_msec=867 rt_tot_avg_msec=160 rollbacks: n=1 %=  1.0
+et=   50.8 n_overall=123 opm=145 rt_tot_lastn_max_msec=723 rt_tot_avg_msec=153 rollbacks: n=1 %=  0.8
+et=   61.0 n_overall=148 opm=145 rt_tot_lastn_max_msec=723 rt_tot_avg_msec=149 rollbacks: n=1 %=  0.7
+Stats reset
+et=   10.1 n_overall=20 opm=118 rt_tot_lastn_max_msec=808 rt_tot_avg_msec=226 rollbacks: n=2 %= 10.0
+et=   20.3 n_overall=44 opm=130 rt_tot_lastn_max_msec=946 rt_tot_avg_msec=186 rollbacks: n=2 %=  4.5
+et=   30.5 n_overall=71 opm=139 rt_tot_lastn_max_msec=946 rt_tot_avg_msec=153 rollbacks: n=2 %=  2.8
+et=   40.6 n_overall=102 opm=150 rt_tot_lastn_max_msec=946 rt_tot_avg_msec=133 rollbacks: n=3 %=  2.9
+et=   50.8 n_overall=123 opm=145 rt_tot_lastn_max_msec=1205 rt_tot_avg_msec=139 rollbacks: n=4 %=  3.3
+et=   60.9 n_overall=150 opm=147 rt_tot_lastn_max_msec=1205 rt_tot_avg_msec=137 rollbacks: n=5 %=  3.3
+Run over
+Final: et=   61.0 n_overall=150 opm=147 rt_tot_lastn_max=1205 rt_tot_avg=137 n_login_overall=121 n_newcust_overall=29 
+n_browse_overall=403 n_purchase_overall=150 rt_login_avg_msec=33 rt_newcust_avg_msec=21 rt_browse_avg_msec=9 
+rt_purchase_avg_msec=80 n_rollbacks_overall=5 rollback_rate =   3.3% 
+Thread 0: exiting
+Controller: all threads stopped, exiting; n_purchase_from_start= 299 n_rollbacks_from_start= 6
+C:\ds2\drivers>
+--------------------------------------------------------------------------------------------------------------
+Description of counters:
+
+et: elapsed time (since start if during warmup; since Stats reset if after warmup time is over)
+n_overall: total number of orders processed between Stats reset and Run over
+opm: orders per minute (exported to Perfmon counter test/opm)
+rt_tot:  total response time seen by a user during an order cycle 
+  (sum of all response times during order: login/create new customer, browse(s), purchase),
+rt_tot_avg_msec:  average of rt_tot over all orders in milliseconds
+rt_tot_lastn_max_msec:  maximum rt_tot seen by last 100 users in milliseconds (exported to perfmon counter test/rt)
+rollbacks:  number of time order has to be rolled back due to insufficient quantity 
+  (these are counted in the opm but won't show up as a new Order in the database)
+
+Final (all stats are accumulated between Stats reset and Run over):
+n_login_overall: total number of logins during run
+n_newcust_overall: total number of new customer registrations during run
+n_browse_overall: total number of browses during run
+n_purchase_overall: total number of purchases during run
+rt_login_avg_msec: average login time in milliseconds
+rt_newcust_avg_msec: average new customer registration time in milliseconds
+rt_browse_avg_msec: average browse time in milliseconds
+rt_purchase_avg_msec: average purchase time in milliseconds
+n_rollback_overall: total number of rollbacks during run
+rollback rate: n_rollback_overall/n_overall * 100%
+host CPU%: average CPU Utilization % between Stats reset and Run over (Windows only; requires admin priviliges on client)
+
+After all threads are stopped, the total n_purchase and n_rollbacks during the entire run, including warmup 
+and while the threads are stopping, is printed out
+the number of new orders in the database during the run should be
+n_purchase_from_start - n_rollbacks_from_start

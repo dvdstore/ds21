@@ -1,0 +1,17 @@
+
+ds2_pgsql_change_log.txt
+
+11/8/11:  Posted ds2_pgsql.tar.gz to linux.dell.com
+
+9/20/12: Made several changes to fix bugs and improve robustness (TM)
+
+pgsqlds2_create_trig.sql - Change to trigger to increase stock level to 250 and 2500 for hot items
+
+ds2pgsqlfns.cs - increased connection timeout for Postgres by setting the values for MaxPoolSize to 200
+		Timeout to 1024 and CommandTimeout to 1200
+
+pgsqlds2_create_all.sh - Modified syntax of ANALYZE to improve analysis - changed from ANALYZE to VACUUM ANALYZE
+
+dscommon.jsp - fixed closing comment in header
+
+dspurchase.php - added a line to fix condition where there isn't a default time zone

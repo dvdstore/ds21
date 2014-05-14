@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="build">
+
+  <property file="build.properties"/>
+  <property name="src.dir" value="src"/>
+  <property name="build.dir" value="classes"/>
+	
+  <path id="build.classpath">
+      <fileset dir="lib">
+          <include name="*.jar"/>
+      </fileset>
+      <!-- servlet API classes: -->
+      <fileset dir="${appserver.lib}">
+          <include name="servlet*.jar"/>
+      </fileset>
+      <pathelement path="${build.dir}"/>
+  </path>		
+	
+  <target name="build">
+      <mkdir dir="${build.dir}"/>
+      <javac destdir="${build.dir}" source="1.6" target="1.6" debug="true" deprecation="false" optimize="false" failonerror="true">
+          <src path="${src.dir}"/>
+          <classpath refid="build.classpath"/>
+      </javac>
+  </target>
+	
+	
+  <target name="clean" description="Clean output directories">
+      <delete>
+          <fileset dir="${build.dir}">
+              <include name="**/*.class"/>
+          </fileset>
+      </delete>
+  </target>
+	
+</project>

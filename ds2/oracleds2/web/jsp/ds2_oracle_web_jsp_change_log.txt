@@ -1,0 +1,5 @@
+
+ds2_oracle_web_jsp_change_log.txt
+
+12/16/05: Changed target hostname (localhost) and servicename (orcl) in JSP connect strings for clarity
+12/3/07:  Added extra try/catch statement to dspurchase.jsp

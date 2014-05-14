@@ -1,0 +1,122 @@
+        
+ds2_schema.txt
+
+DVD Store Release 2 Database Schema
+-----------------------------------
+
+Table           Columns                 Number of Rows (Large database) 
+-----           -------                 -------------------------------
+
+Customers       CUSTOMERID              200 million
+                FIRSTNAME
+                LASTNAME
+                ADDRESS1
+                ADDRESS2
+                CITY
+                STATE
+                ZIP
+                COUNTRY
+                REGION
+                EMAIL
+                PHONE
+                CREDITCARDTYPE
+                CREDITCARD
+                CREDITCARDEXPIRATION
+                USERNAME
+                PASSWORD
+                AGE
+                INCOME
+                GENDER
+
+Orders          ORDERID                 120 million
+                ORDERDATE
+                CUSTOMERID
+                NETAMOUNT
+                TAX
+                TOTALAMOUNT
+
+Orderlines      ORDERLINEID             600 million
+                ORDERID
+                PROD_ID
+                QUANTITY
+                ORDERDATE
+
+Cust_Hist       CUSTOMERID              600 million
+                ORDERID
+                PROD_ID
+
+Products        PROD_ID                 1 million
+                CATEGORY
+                TITLE
+                ACTOR
+                PRICE
+                SPECIAL
+                COMMON_PROD_ID
+
+Inventory       PROD_ID                 1 million
+                QUAN_IN_STOCK
+                SALES
+
+Reorder         PROD_ID                 variable
+                DATE_LOW
+                QUAN_LOW
+                DATE_REORDERED
+                QUAN_REORDERED
+                DATE_EXPECTED
+
+Categories      CATEGORY                16
+                CATEGORYNAME
+        
+
+Stored Procedures   
+-----------------
+
+The DVD Store database is managed through six stored procedures. The first two are used during the login phase. 
+If the customer is a returning customer, Login is used to retrieve the customer's information, in particular 
+the CUSTOMERID. If the customer is a new customer, New_customer is used to create a new row in the Customers 
+table with the user's data. Following the login phase the customer might search for a DVD by category, 
+actor or title. These are implemented by Browse_by_category, Browse_by_actor and Browse_by_title, respectively. 
+Finally, after the user has made his or her selections, the Purchase stored procedure is called to complete the transaction.
+   
+The stored procedures of the DS2 application have features to better model today's online stores. 
+During Login, for example, the user's previous order (up to ten titles) is reported, along with titles 
+that other customers who like those titles have recommended. The Browse_by_category returns those titles 
+in the specified category that are currently on sale. And the Purchase stored procedure now checks the QUAN_IN_STOCK 
+field from the Inventory table to see if a title is available. This is done using a database transaction, 
+so that if there is insufficient quantity to fill the order neither the QUAN_IN_STOCK data is updated 
+nor is a new record written to the ORDERS table. 
+        
+
+Driver Program
+--------------    
+
+A multi-threaded driver program, included with DS2, is used to simulate an order entry or online 
+transaction processing (OLTP) workload. Each thread of the OLTP driver application connects to the database 
+(either directly or through a web layer) and makes a series of stored procedure calls that simulates users 
+logging in, browsing and purchasing.  Each completed sequence by a customer is counted as a single order. 
+The driver measures order rates and the average response time to complete each order. Several tunable 
+parameters are used to control the application and are described below.
+
+Parameter               Description                                             Default
+---------               -----------                                             -------
+n_threads               Number of simultaneous connections to the database      1
+delay_time              Amount of time a thread waits between orders            0 seconds
+pct_returning           Percent of users that are returning users               80%
+pct_newcustomers        Percent of users that are new users                     20%
+n_searches              Number of searches per order                            Range: 1 - 5
+                                                                                Average: 3
+search_batch_size       Number of items returned in each search                 Range: 1 - 9
+                                                                                Average: 5
+n_line_items            Number of items purchased                               Range: 1 - 9    
+                                                                                Average: 5
+net_amount              Total amount of purchase                                Range: $0.01 - $400.00  
+                                                                                Average: $200.00                
+So with the default settings, the average order consists of 1 login/new customer create step, 3 searches, 
+and 1 purchase.  The delay_time may be set to a typical user read/think/type time for an order so that the 
+number of threads then corresponds to the number of simultaneous users. Or an extremely small delay
+is used so that the database connections are kept full, simulating what happens in a real multi-tiered 
+application where some small number of connections are pooled and shared among the web servers 
+that may be handling thousands of simultaneous customers. Thus a realistic simulation of database activity is 
+achieved without needing to model thousands of users.        
+
+<dave_jaffe@dell.com> and <tmuirhead@vmware.com>  12/16/05

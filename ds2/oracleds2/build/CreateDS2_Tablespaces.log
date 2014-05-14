@@ -1,0 +1,25 @@
+SQL> 
+SQL> --Currently this template assumes need for only single datafile per table
+SQL> --This might impact performance for larger database sizes, so either user needs to edit the generated script from this template or change logic in perl script to generate required build table space script
+SQL> --Paramters that need to be changed acc to database size are - number of datafiles per table, initial size of data file and size of increments for data file in case of overflow
+SQL> 
+SQL> --Paths for windows should be like this : c:\oracledbfiles\
+SQL> --paths for linux should be like this : /oracledbfiles/
+SQL> 
+SQL> CREATE TABLESPACE "CUSTTBS" LOGGING DATAFILE 'm:\sql\10mb\cust.dbf' SIZE 1000M REUSE AUTOEXTEND ON NEXT 100M MAXSIZE UNLIMITED  EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO ;
+
+Tablespace created.
+
+SQL> CREATE TABLESPACE "INDXTBS" LOGGING DATAFILE 'm:\sql\10mb\indx.dbf' SIZE 1000M REUSE AUTOEXTEND ON NEXT 100M MAXSIZE UNLIMITED  EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO ;
+
+Tablespace created.
+
+SQL> CREATE TABLESPACE "DS_MISC" LOGGING DATAFILE 'm:\sql\10mb\ds_misc.dbf' SIZE 500M REUSE AUTOEXTEND ON NEXT 100M MAXSIZE UNLIMITED EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO ;
+
+Tablespace created.
+
+SQL> CREATE TABLESPACE "ORDERTBS" LOGGING DATAFILE 'm:\sql\10mb\order.dbf' SIZE 1000M REUSE AUTOEXTEND ON NEXT 100M MAXSIZE UNLIMITED EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO;
+
+Tablespace created.
+
+SQL> spool off

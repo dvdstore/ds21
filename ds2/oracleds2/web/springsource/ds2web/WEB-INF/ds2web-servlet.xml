@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	
+	<bean name="/index.html" class="com.ds2web.indexController">	    
+	</bean>
+	
+	<bean name="/dslogin.html" class="com.ds2web.loginController">	    
+	</bean>
+	
+	<bean name="/dsbrowse.html" class="com.ds2web.browseController">	    
+	</bean>
+	
+	<bean name="/dsnewcustomer.html" class="com.ds2web.newcustomerController">	    
+	</bean>
+	
+	<bean name="/dspurchase.html" class="com.ds2web.purchaseController">	    
+	</bean>
+
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	    <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+	    <property name="prefix" value="/jsp/"/>
+	    <property name="suffix" value=".jsp"/>
+	</bean>
+    
+</beans>

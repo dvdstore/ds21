@@ -1,0 +1,28 @@
+1/16/07
+
+Installed 10.2.0.1 client for Windows x64 (102010_win64_x64_client.zip)
+Patched it to 10.2.0.2 with p4547817_10202_MSWIN-x86-64.zip
+Installed ODAC 10.2.0.2 (ODAC10202.exe) in C:\oracle\product\10.2.0\ODAC
+  which includes 
+    C:\oracle\product\10.2.0\ODAC\odp.net\bin\1.x\Oracle.DataAccess.dll and
+    C:\oracle\product\10.2.0\ODAC\odp.net\bin\2.x\Oracle.DataAccess.dll
+
+To get working ds2oracledriver.exe I had to do the following:
+  1) Specify as reference C:\oracle\product\10.2.0\ODAC\odp.net\bin\1.x\Oracle.DataAccess.dll
+  
+  2) In ds2oraclefns.cs change the (int) cast from a returned parameter to (int) (Int32)
+     in 8 places (stored as ds2oraclefns.cs.64):
+        rows_returned = (int) (Int32) Login_prm[3].Value;
+        customerid_out = (int) (Int32) Login_prm[4].Value;
+        customerid_out = (int) (Int32) New_Customer_prm[19].Value;
+            rows_returned = (int) (Int32) Browse_By_Category_prm[1].Value;
+            rows_returned = (int) (Int32) Browse_By_Actor_prm[1].Value;
+            rows_returned = (int) (Int32) Browse_By_Title_prm[1].Value;
+        int prod_id = (int) (Int32) Rdr.GetDecimal(0);
+        neworderid_out = (int) (Int32) Purchase_prm[5].Value;
+  3) Compile for x86 only
+
+Then, to resolve TNS names I had to copy
+  C:\oracle\product\10.2.0\client_1\NETWORK\ADMIN\tnsnames.ora to
+  C:\oracle\product\10.2.0\ODAC\network\ADMIN
+

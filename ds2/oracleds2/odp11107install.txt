@@ -1,0 +1,17 @@
+- Install Oracle 11g client for W2K8 64b 11.1.0.7.0 from 11107_w2k8_x64_production_client.zip to c:\oracle
+  - Includes Oracle Data Provider for .NET 11g Release 1
+  - Create tnsnames.ora in C:\oracle\app\Administrator\product\11.1.0\client_1\network\admin:
+    b8db2 =
+      (DESCRIPTION =
+        (ADDRESS = (PROTOCOL = TCP)(HOST = b8db2.lab05.local)(PORT = 1521))
+        (CONNECT_DATA =
+          (SERVER = DEDICATED)
+          (SERVICE_NAME = b8db2.lab05.local)
+        )
+      )
+
+- Compile ds2oracledriver_64b_client.exe from ds2oraclefns_64b_client.cs:
+
+  C:\ds2\oracleds2>C:\Windows\Microsoft.NET\Framework64\v3.5\csc /out:ds2oracledriver_64b_client.exe 
+   C:\ds2\drivers\ds2xdriver.cs ds2oraclefns_64b_client.cs /d:USE_WIN32_TIMER /d:GEN_PERF_CTRS 
+   /r:\oracle\app\Administrator\product\11.1.0\client_1\ODP.NET\bin\2.x\oracle.DataAccess.dll /platform:x64

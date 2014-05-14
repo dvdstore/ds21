@@ -1,0 +1,86 @@
+
+SQL*Loader: Release 11.2.0.1.0 - Production on Fri Jun 25 15:30:12 2010
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   nov_orderlines.ctl
+Data File:      ../../../data_files/orders/nov_orderlines.csv
+  Bad File:     nov_orderlines.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 0
+Errors allowed: 50
+Continuation:    none specified
+Path used:      Direct
+
+Load is UNRECOVERABLE; invalidation redo is produced.
+
+Table DS2.ORDERLINES, partition NOV2009, loaded from every logical record.
+Insert option in effect for this partition: APPEND
+TRAILING NULLCOLS option in effect
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+ORDERLINEID                         FIRST     *   ,  O(") CHARACTER            
+ORDERID                              NEXT     *   ,  O(") CHARACTER            
+PROD_ID                              NEXT     *   ,  O(") CHARACTER            
+QUANTITY                             NEXT     *   ,  O(") CHARACTER            
+ORDERDATE                            NEXT     *   ,  O(") DATE yyyy/mm/dd      
+
+Record 1: Rejected - Error on table DS2.ORDERLINES, partition NOV2009.
+ORA-14401: inserted partition key is outside specified partition
+
+Record 2: Rejected - Error on table DS2.ORDERLINES, partition NOV2009.
+ORA-14401: inserted partition key is outside specified partition
+
+Record 3: Rejected - Error on table DS2.ORDERLINES, partition NOV2009.
+ORA-14401: inserted partition key is outside specified partition
+
+Record 4: Rejected - Error on table DS2.ORDERLINES, partition NOV2009.
+ORA-14401: inserted partition key is outside specified partition
+
+Record 5: Rejected - Error on table DS2.ORDERLINES, partition NOV2009.
+ORA-14401: inserted partition key is outside specified partition
+
+Record 6: Rejected - Error on table DS2.ORDERLINES, partition NOV2009.
+ORA-14401: inserted partition key is outside specified partition
+
+Record 7: Rejected - Error on table DS2.ORDERLINES, partition NOV2009.
+ORA-14401: inserted partition key is outside specified partition
+
+Record 8: Rejected - Error on table DS2.ORDERLINES, partition NOV2009.
+ORA-14401: inserted partition key is outside specified partition
+
+
+Table DS2.ORDERLINES, partition NOV2009:
+  5051 Rows successfully loaded.
+  8 Rows not loaded due to data errors.
+  0 Rows not loaded because all WHEN clauses were failed.
+  0 Rows not loaded because all fields were null.
+
+  Date cache:
+   Max Size:      1000
+   Entries :        31
+   Hits    :      5028
+   Misses  :         0
+
+Bind array size not used in direct path.
+Column array  rows :    5000
+Stream buffer bytes:  256000
+Read   buffer bytes: 1048576
+
+Total logical records skipped:          0
+Total logical records read:          5059
+Total logical records rejected:         8
+Total logical records discarded:        0
+Total stream buffers loaded by SQL*Loader main thread:       10
+Total stream buffers loaded by SQL*Loader load thread:        0
+
+Run began on Fri Jun 25 15:30:12 2010
+Run ended on Fri Jun 25 15:30:15 2010
+
+Elapsed time was:     00:00:02.94
+CPU time was:         00:00:02.24
